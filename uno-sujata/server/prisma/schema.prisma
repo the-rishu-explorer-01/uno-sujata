@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Catalogue ----------
+
+model ProductCategory {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  summary   String
+  sortOrder Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Material {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  products Product[]
+}
+
+model Application {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  products Product[]
+}
+
+model ManufacturingProcess {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  products Product[]
+}
+
+model Product {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  name        String
+  productCode String?         @unique          // null until supplied by the client
+  productType String                            // e.g. "Pin", "Terminal"
+  description String
+  finishes    String[]        @default([])
+  verified    Boolean         @default(false)   // true once technical data is confirmed
+  published   Boolean         @default(true)
+  categoryId  String
+  category    ProductCategory @relation(fields: [categoryId], references: [id])
+  materials    Material[]
+  applications Application[]
+  processes    ManufacturingProcess[]
+  images       ProductImage[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([categoryId])
+  @@index([productType])
+  @@index([published])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String
+  width     Int?
+  height    Int?
+  sortOrder Int      @default(0)
+
+  @@index([productId])
+}
+
+// ---------- Company content ----------
+
+model Industry {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  summary   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Capability {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------- Leads ----------
+
+model QuoteRequest {
+  id          String   @id @default(cuid())
+  reference   String   @unique
+  name        String
+  company     String
+  email       String
+  phone       String
+  country     String
+  requirement String
+  quantity    String?
+  hasDrawing  Boolean  @default(false)
+  productSlug String?  // product the visitor came from, if any
+  status      String   @default("NEW")
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+}
