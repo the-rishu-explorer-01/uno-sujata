@@ -10,6 +10,20 @@ export function createApp() {
 
   app.disable("x-powered-by");
 
+  // Baseline security headers for every response. The site's own CSP is set at the host or CDN,
+  // because it depends on the final list of script and font origins.
+  app.use((_req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+    if (process.env.NODE_ENV === "production") {
+      res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    }
+    next();
+  });
+
   // Behind a reverse proxy, set TRUST_PROXY to the number of proxies so rate limits see the real client IP.
   app.set("trust proxy", Number(process.env.TRUST_PROXY ?? 0));
 
