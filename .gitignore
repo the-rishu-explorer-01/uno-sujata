@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+# Customer drawings. Never commit, never serve publicly.
+uploads/
+server/uploads/
+*.log
+public-media/
