@@ -15,3 +15,9 @@ export const productImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 1, fields: 2, fieldSize: 500, parts: 4 },
 }).single("image");
+
+/** Public PDF document (catalogue, brochure). One file per request, bounded to the document limit. */
+export const documentUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024, files: 1, fields: 0, parts: 2 },
+}).single("file");

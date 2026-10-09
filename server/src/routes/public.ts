@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { contactLimiter } from "../middleware/rateLimit.js";
+import { contactLimiter, searchLimiter } from "../middleware/rateLimit.js";
+import { discoveryController as d } from "../controllers/discovery.controller.js";
 import { publicContactBody } from "../lib/adminSchemas.js";
 import { getContent } from "../services/content.service.js";
 import { createContactEnquiry } from "../services/contact.service.js";
@@ -16,6 +17,12 @@ publicRouter.get("/content", async (_req, res, next) => {
     next(err);
   }
 });
+
+/** Global search across products, categories, industries, capabilities, resources and pages. */
+publicRouter.get("/search", searchLimiter, d.search);
+publicRouter.get("/search/suggestions", searchLimiter, d.suggestions);
+publicRouter.get("/resources", d.resources);
+publicRouter.get("/faqs", d.faqs);
 
 publicRouter.post("/contact", contactLimiter, async (req, res, next) => {
   try {

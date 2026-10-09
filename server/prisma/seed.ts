@@ -13,6 +13,7 @@ import {
   describeProduct,
 } from "../../src/data/products";
 import { industries, capabilities } from "../../src/data/content";
+import { faqEntries } from "../../src/data/faq";
 
 const prisma = new PrismaClient();
 
@@ -109,6 +110,8 @@ async function main() {
     });
   }
 
+  await seedFaqs(prisma);
+
   console.log(
     `[seed] ${categories.length} categories, ${products.length} products, ${materials.length} materials, ${applications.length} applications, ${processes.length} processes`
   );
@@ -120,3 +123,14 @@ main()
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());
+
+/** Factual FAQ answers. Entries come from src/data/faq.ts so the frontend fallback and the database match. */
+export async function seedFaqs(db: PrismaClient) {
+  const existing = await db.faqEntry.count();
+  if (existing > 0) return; // do not overwrite entries edited in the admin
+  let order = 0;
+  for (const f of faqEntries) {
+    await db.faqEntry.create({ data: { question: f.question, answer: f.answer, category: f.category, published: true, sortOrder: order++ } });
+  }
+  console.log(`[seed] ${faqEntries.length} FAQ entries`);
+}

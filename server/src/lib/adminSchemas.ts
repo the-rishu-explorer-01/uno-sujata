@@ -96,3 +96,29 @@ export const publicContactBody = z.object({
   message: str(3000, 10),
   website: z.string().max(0).optional(),
 });
+
+// ---- Resources and FAQ ----
+// Literal tuples, so the parsed value matches Prisma's enum types exactly.
+const RESOURCE_TYPE_VALUES = ["CATALOGUE", "TECHNICAL", "BROCHURE", "QUALITY", "APPLICATION"] as const;
+const FAQ_CATEGORY_VALUES = ["ORDERING", "CUSTOM_PARTS", "MATERIALS", "DRAWINGS", "RFQ_PROCESS", "QUALITY", "PACKAGING"] as const;
+
+export const resourceBody = z.object({
+  title: str(160, 3),
+  type: z.enum(RESOURCE_TYPE_VALUES),
+  description: str(600, 10),
+  sortOrder: z.coerce.number().int().min(0).max(999).default(0),
+  published: z.boolean().default(false),
+});
+
+export const faqBody = z.object({
+  question: str(300, 8),
+  answer: str(3000, 10),
+  category: z.enum(FAQ_CATEGORY_VALUES),
+  published: z.boolean().default(false),
+  sortOrder: z.coerce.number().int().min(0).max(999).default(0),
+});
+
+/** Search box input. Only the length and format are checked here; the service cleans the text. */
+export const searchQuery = z.object({
+  q: z.string().max(200).optional(),
+});

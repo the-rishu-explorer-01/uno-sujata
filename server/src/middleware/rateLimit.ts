@@ -47,3 +47,12 @@ export const contactLimiter = rateLimit({
   limit: Number(process.env.CONTACT_LIMIT ?? 10),
   message: { error: "Too many messages. Please wait a few minutes and try again." },
 });
+
+/** Search: typing fires requests after a pause, so allow a generous rate per minute per IP. */
+export const searchLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: Number(process.env.SEARCH_LIMIT ?? 120),
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Too many searches. Please wait a moment." },
+});

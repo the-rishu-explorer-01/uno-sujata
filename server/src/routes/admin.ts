@@ -3,7 +3,8 @@ import { authController as auth } from "../controllers/admin.auth.controller.js"
 import { adminController as a } from "../controllers/admin.controller.js";
 import { requireAuth, requireCsrf, requirePermission } from "../middleware/auth.js";
 import { adminLimiter, adminLoginLimiter } from "../middleware/rateLimit.js";
-import { productImageUpload } from "../middleware/upload.js";
+import { productImageUpload, documentUpload } from "../middleware/upload.js";
+import { adminContentController as c } from "../controllers/admin-content.controller.js";
 
 /**
  * Administration API, mounted at /api/admin.
@@ -72,6 +73,19 @@ adminRouter.post("/contacts/:id/handled", requirePermission("contact:write"), a.
 adminRouter.get("/users", requirePermission("user:manage"), a.listUsers);
 adminRouter.post("/users", requirePermission("user:manage"), a.createUser);
 adminRouter.patch("/users/:id", requirePermission("user:manage"), a.updateUser);
+
+// FAQ (content)
+adminRouter.get("/faqs", requirePermission("content:read"), c.listFaqs);
+adminRouter.post("/faqs", requirePermission("content:write"), c.createFaq);
+adminRouter.put("/faqs/:id", requirePermission("content:write"), c.updateFaq);
+adminRouter.delete("/faqs/:id", requirePermission("content:write"), c.deleteFaq);
+
+// Resources (documents). A resource is published only after its PDF has been uploaded.
+adminRouter.get("/resources", requirePermission("content:read"), c.listResources);
+adminRouter.post("/resources", requirePermission("content:write"), c.createResource);
+adminRouter.put("/resources/:id", requirePermission("content:write"), c.updateResource);
+adminRouter.post("/resources/:id/file", requirePermission("content:write"), documentUpload, c.uploadResourceFile);
+adminRouter.delete("/resources/:id", requirePermission("content:write"), c.deleteResource);
 
 // Audit trail
 adminRouter.get("/audit", requirePermission("audit:read"), a.audit);

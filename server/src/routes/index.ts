@@ -14,18 +14,30 @@ apiRouter.use("/admin", adminRouter);
 // Public CMS content and contact form
 apiRouter.use(publicRouter);
 
+/** Catalogue reads change rarely; a short shared cache removes repeat requests from every visitor. */
+const cacheFor = (seconds: number) => (_req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => {
+  res.set("Cache-Control", `public, max-age=${seconds}, stale-while-revalidate=300`);
+  next();
+};
+
 // Catalogue
-apiRouter.get("/products", c.products);
-apiRouter.get("/products/:slug", c.productBySlug);
-apiRouter.get("/categories", c.categories);
-apiRouter.get("/materials", c.materials);
-apiRouter.get("/applications", c.applications);
-apiRouter.get("/processes", c.processes);
-apiRouter.get("/facets", c.facets);
+/** Searched product lists are not shared-cached, because the URL then records what people searched for. */
+const cacheUnlessSearching = (req: import("express").Request, res: import("express").Response, next: import("express").NextFunction) => {
+  if (req.query.search) res.set("Cache-Control", "private, no-store");
+  else res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+  next();
+};
+apiRouter.get("/products", cacheUnlessSearching, c.products);
+apiRouter.get("/products/:slug", cacheFor(60), c.productBySlug);
+apiRouter.get("/categories", cacheFor(300), c.categories);
+apiRouter.get("/materials", cacheFor(300), c.materials);
+apiRouter.get("/applications", cacheFor(300), c.applications);
+apiRouter.get("/processes", cacheFor(300), c.processes);
+apiRouter.get("/facets", cacheFor(300), c.facets);
 
 // Company content
-apiRouter.get("/industries", c.industries);
-apiRouter.get("/capabilities", c.capabilities);
+apiRouter.get("/industries", cacheFor(300), c.industries);
+apiRouter.get("/capabilities", cacheFor(300), c.capabilities);
 
 // Request for quotation
 apiRouter.post("/rfq/uploads", uploadLimiter, singleDrawing, r.stageUpload);

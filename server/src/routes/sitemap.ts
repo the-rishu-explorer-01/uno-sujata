@@ -24,6 +24,8 @@ sitemapRouter.get("/sitemap.xml", async (_req, res, next) => {
       { loc: "/capabilities", priority: "0.8" },
       { loc: "/quality", priority: "0.7" },
       { loc: "/about", priority: "0.6" },
+      { loc: "/resources", priority: "0.7" },
+      { loc: "/faq", priority: "0.7" },
       { loc: "/contact", priority: "0.6" },
       ...industries.map((i) => ({ loc: `/industries/${i.slug}`, lastmod: i.updatedAt, priority: "0.7" })),
       ...categories.map((c) => ({ loc: `/products/category/${c.slug}`, lastmod: c.updatedAt, priority: "0.8" })),

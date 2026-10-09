@@ -279,3 +279,57 @@ model ContactEnquiry {
   @@index([status])
   @@index([createdAt])
 }
+
+// ---------- Resources and FAQ ----------
+
+enum ResourceType {
+  CATALOGUE
+  TECHNICAL
+  BROCHURE
+  QUALITY
+  APPLICATION
+}
+
+/**
+ * A downloadable document. A row can only be published when a file has been uploaded and checked,
+ * so the public page never links to a document that does not exist.
+ */
+model Resource {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  type        ResourceType
+  description String
+  fileUrl     String?      // /media/<name>.pdf, set only after a valid upload
+  fileName    String?      // name shown to the download
+  sizeBytes   Int?
+  published   Boolean      @default(false)
+  sortOrder   Int          @default(0)
+  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime     @default(now())
+
+  @@index([type, published])
+}
+
+enum FaqCategory {
+  ORDERING
+  CUSTOM_PARTS
+  MATERIALS
+  DRAWINGS
+  RFQ_PROCESS
+  QUALITY
+  PACKAGING
+}
+
+model FaqEntry {
+  id        String      @id @default(cuid())
+  question  String
+  answer    String
+  category  FaqCategory
+  published Boolean     @default(false)
+  sortOrder Int         @default(0)
+  updatedAt DateTime    @updatedAt
+  createdAt DateTime    @default(now())
+
+  @@index([category, published])
+}
